@@ -1,0 +1,24 @@
+{
+    "name": "hexlet/code",
+    "description": "my hexlet project",
+    "type": "project",
+    "license": "pu",
+    "authors": [
+        {
+            "name": "Kengston"
+        }
+    ],
+    "require": {
+        "docopt/docopt": "^1.0",
+        "funct/funct": "^1.5"
+    },
+    "bin": [
+        "bin/gendiff"
+    ],
+    "autoload": {
+        "files": [
+            "src/Differ.php",
+            "src/cli.php"
+        ]
+    }
+}

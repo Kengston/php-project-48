@@ -1,33 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-$autoloadPath1 = __DIR__ . '/../../../autoload.php';
-$autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
+use function Differ\Cli\run;
 
-if (file_exists($autoloadPath1)) {
-    require_once $autoloadPath1;
-} else {
-    require_once $autoloadPath2;
-}
+require_once __DIR__ . '/../vendor/autoload.php';
 
-const DOC = <<<DOC
-gendiff -h
-
-Generate diff
-
-Usage:
-  gendiff (-h|--help)
-  gendiff (-v|--version)
-  gendiff [--format <fmt>] <firstFile> <secondFile>
-
-Options:
-  -h --help                     Show this screen
-  -v --version                  Show version
-  --format <fmt>                Report format [default: stylish]
-DOC;
-
-$args = Docopt::handle(DOC, ['version' => '0.1']);
-$firstFile = $args['<firstFile>'];
-$secondFile = $args['<secondFile>'];
-
-print_r($firstFile, $secondFile);
+run();
