@@ -4,6 +4,9 @@ install:
 validate:
 	composer validate
 
+dump-autoload:
+	composer dump-autoload
+
 console:
 	composer exec --verbose psysh
 
