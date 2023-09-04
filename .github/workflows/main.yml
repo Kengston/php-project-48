@@ -1,0 +1,31 @@
+name: PHP CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run tests
+        run: composer test
+
+      - name: Run linter
+        run: composer lint
