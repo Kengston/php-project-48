@@ -4,6 +4,9 @@ install:
 validate:
 	composer validate
 
+update:
+	composer update
+
 dump-autoload:
 	composer dump-autoload
 
@@ -11,7 +14,7 @@ console:
 	composer exec --verbose psysh
 
 lint:
-	composer exec --verbose phpcs -- --standard=PSR12 src tests
+	./vendor/bin/phpcs
 	composer exec --verbose phpstan
 
 lint-fix:

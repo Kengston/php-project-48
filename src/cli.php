@@ -26,8 +26,12 @@ function run()
 {
     $args = \Docopt::handle(DOC, ['version' => '0.1']);
 
-    $firstFilePath = $args['<firstFile>'];
-    $secondFilePath = $args['<secondFile>'];
+    if ($args['<firstFile>'] && $args['<secondFile>']) {
+        $firstFilePath = $args['<firstFile>'];
+        $secondFilePath = $args['<secondFile>'];
 
-    print_r(findDiff($firstFilePath, $secondFilePath));
+        print_r(findDiff($firstFilePath, $secondFilePath));
+    }
 }
+
+run();
