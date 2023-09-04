@@ -10,6 +10,9 @@ update:
 dump-autoload:
 	composer dump-autoload
 
+require:
+	composer require --dev squizlabs/php_codesniffer
+
 console:
 	composer exec --verbose psysh
 
