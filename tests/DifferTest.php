@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 use function Differ\Differ\findDiff;
 
-class GenDiffTest extends TestCase
+class DifferTest extends TestCase
 {
     public function testDiffJsonFlat()
     {
