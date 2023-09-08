@@ -10,6 +10,7 @@ function findDiff($pathToFile1, $pathToFile2)
     $data2 = json_decode(file_get_contents($pathToFile2), true);
 
     $keys = union(array_keys($data1), array_keys($data2));
+    sort($keys);
 
     $diff = array_map(function ($key) use ($data1, $data2) {
         if (!array_key_exists($key, $data1)) {
