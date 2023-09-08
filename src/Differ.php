@@ -3,12 +3,14 @@
 namespace Differ\Differ;
 
 use function Funct\Collection\union;
+use function Differ\Parsers\ParseData;
 
 function findDiff($pathToFile1, $pathToFile2)
 {
 
-    $data1 = json_decode(file_get_contents($pathToFile1), true);
-    $data2 = json_decode(file_get_contents($pathToFile2), true);
+
+    $data1 = parseData(file_get_contents($pathToFile1));
+    $data2 = parseData(file_get_contents($pathToFile2));
 
     $keys = union(array_keys($data1), array_keys($data2));
     sort($keys);
