@@ -14,4 +14,11 @@ class DifferTest extends TestCase
 
         $this->assertStringEqualsFile(__DIR__ . '/fixtures/diff.txt', $diff);
     }
+
+    public function testDiffYamFlat()
+    {
+        $diff = findDiff(__DIR__ . '/fixtures/filepath1.yml', __DIR__ . '/fixtures/filepath2.yml');
+
+        $this->assertStringEqualsFile(__DIR__ . '/fixtures/diff.txt', $diff);
+    }
 }
