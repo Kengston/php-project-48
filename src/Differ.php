@@ -7,8 +7,6 @@ use function Differ\Parsers\ParseData;
 
 function findDiff($pathToFile1, $pathToFile2)
 {
-
-
     $data1 = parseData(file_get_contents($pathToFile1));
     $data2 = parseData(file_get_contents($pathToFile2));
 

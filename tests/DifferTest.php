@@ -21,4 +21,16 @@ class DifferTest extends TestCase
 
         $this->assertStringEqualsFile(__DIR__ . '/fixtures/diff.txt', $diff);
     }
+
+    public function testDiffJsonRec() {
+        $diff = findDiff(__DIR__ . '/fixtures/fileIn1.json', __DIR__ . '/fixtures/fileIn2.json');
+
+        $this->assertStringEqualsFile(__DIR__ . '/fixtures/diff2.txt', $diff);
+    }
+
+    public function testDiffYamRec() {
+        $diff = findDiff(__DIR__ . '/fixtures/fileIn1.yaml', __DIR__ . '/fixtures/fileIn2.yaml');
+
+        $this->assertStringEqualsFile(__DIR__ . '/fixtures/diff2.txt', $diff);
+    }
 }
