@@ -23,7 +23,7 @@ Options:
 DOC;
 
 
-function run()
+function run(): bool
 {
     $args = \Docopt::handle(DOC, ['version' => '0.1']);
 
@@ -31,7 +31,32 @@ function run()
         $firstFilePath = $args['<firstFile>'];
         $secondFilePath = $args['<secondFile>'];
 
-        print_r(findDiff($firstFilePath, $secondFilePath));
+
+
+        if(str_contains($firstFilePath, '/') === false) {
+            $firstFilePath = 'tests/fixtures/'.$firstFilePath;
+        }
+
+        if(str_contains($secondFilePath, '/') === false) {
+            $secondFilePath = 'tests/fixtures/'.$secondFilePath;
+        }
+
+        $isError = false;
+        if(!is_file($firstFilePath)) {
+            $isError = true;
+            echo "Первый файл не файл".PHP_EOL;
+        }
+
+        if(!is_file($secondFilePath)) {
+            $isError = true;
+            echo "Второй файл не файл".PHP_EOL;
+        }
+
+        if (!$isError) {
+            print_r(findDiff($firstFilePath, $secondFilePath));
+        }
+
+        return !$isError;
     }
 }
 
