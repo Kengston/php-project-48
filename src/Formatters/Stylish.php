@@ -51,7 +51,7 @@ function formatToStylish(array $diffTree, int $depth = 0): array
     return $result;
 }
 
-function toString($value): string
+function toString($value, $depth): string
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
