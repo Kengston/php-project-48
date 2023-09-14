@@ -2,19 +2,20 @@
 
 namespace Differ\Formatters;
 
-function format(array $data, string $format): string
+use function Differ\Formatters\Json\format as formatJson;
+use function Differ\Formatters\Stylish\format as formatStylish;
+use function Differ\Formatters\Plain\format as formatPlain;
+
+function format(array $ast, string $format): string
 {
     switch ($format) {
-        case 'stylish':
-            return Stylish\format($data);
-
-        case 'plain':
-            return Plain\format($data);
-
         case 'json':
-            return Json\format($data);
-
+            return formatJson($ast);
+        case 'stylish':
+            return formatStylish($ast);
+        case 'plain':
+            return formatPlain($ast);
         default:
-            throw new \Exception("Incorrect output format $format");
+            throw new \Exception("The report format '{$format}' is not supported");
     }
 }
