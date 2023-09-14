@@ -15,12 +15,31 @@ function findDiff($pathToFile1, $pathToFile2)
     return formatDiffStylish($diff);
 }
 
-function formatValue($value)
+function formatValue($value, $depth)
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
     }
-    return is_array($value) ? '[complex value]' : $value;
+
+    if (is_array($value)) {
+        $formattedValue = formatArray($value, $depth);
+        return "{" . PHP_EOL . $formattedValue . PHP_EOL . str_repeat('    ', $depth - 1) . "}";
+    }
+
+    return $value;
+}
+
+function formatArray($array, $depth)
+{
+    $indentation = str_repeat('    ', $depth);
+    $lines = [];
+
+    foreach ($array as $key => $value) {
+        $formattedValue = is_array($value) ? formatValue($value, $depth + 1) : $value;
+        $lines[] = "{$indentation}{$key}: {$formattedValue}";
+    }
+
+    return implode(PHP_EOL, $lines);
 }
 
 function generateDiff($data1, $data2)
@@ -70,9 +89,15 @@ function generateDiff($data1, $data2)
     return $diff;
 }
 
-function formatDiffStylish($diff, $depth = 1)
+function formatDiffStylish($diff)
 {
-    $indentation = str_repeat('    ', $depth - 1);
+    $result = formatDiff($diff);
+    return "{\n" . implode("\n", $result) . "\n}";
+}
+
+function formatDiff($diff, $depth = 1)
+{
+    $indentation = str_repeat('    ', $depth);
     $lines = [];
 
     foreach ($diff as $item) {
@@ -81,32 +106,36 @@ function formatDiffStylish($diff, $depth = 1)
 
         switch ($type) {
             case 'added':
-                $formattedValue = formatValue($item['value'], $depth);
-                $lines[] = "{$indentation}  + {$key}: {$formattedValue}";
+                $formattedValue = formatValue($item['value'], $depth + 1);
+                $lines[] = "{$indentation}+ {$key}: {$formattedValue}";
                 break;
             case 'removed':
-                $formattedValue = formatValue($item['value'], $depth);
-                $lines[] = "{$indentation}  - {$key}: {$formattedValue}";
+                $formattedValue = formatValue($item['value'], $depth + 1);
+                $lines[] = "{$indentation}- {$key}: {$formattedValue}";
                 break;
             case 'unchanged':
-                $formattedValue = formatValue($item['value'], $depth);
-                $lines[] = "{$indentation}    {$key}: {$formattedValue}";
+                $formattedValue = formatValue($item['value'], $depth + 1);
+                $lines[] = "{$indentation}  {$key}: {$formattedValue}";
                 break;
             case 'changed':
-                $formattedOldValue = formatValue($item['oldValue'], $depth);
-                $formattedNewValue = formatValue($item['newValue'], $depth);
-                $lines[] = "{$indentation}  - {$key}: {$formattedOldValue}";
-                $lines[] = "{$indentation}  + {$key}: {$formattedNewValue}";
+                $formattedOldValue = formatValue($item['oldValue'], $depth + 1);
+                $formattedNewValue = formatValue($item['newValue'], $depth + 1);
+                $lines[] = "{$indentation}- {$key}: {$formattedOldValue}";
+                $lines[] = "{$indentation}+ {$key}: {$formattedNewValue}";
                 break;
             case 'nested':
-                $nestedLines = formatDiffStylish($item['children'], $depth + 1);
-                $lines[] = "{$indentation}    {$key}: {" . PHP_EOL . $nestedLines . PHP_EOL . "{$indentation}    }";
+                $lines[] = "{$indentation}  {$key}: {";
+                $nestedLines = formatDiff($item['children'], $depth + 1);
+                $lines[] = implode("\n", $nestedLines);
+                $lines[] = "{$indentation}  }";
                 break;
         }
     }
 
-    return "{" . PHP_EOL . implode(PHP_EOL, $lines) . PHP_EOL . "{$indentation}}";
+    return $lines;
 }
+
+
 
 
 
