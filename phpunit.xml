@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd" cacheDirectory=".phpunit.cache">
-  <!-- ... -->
-  <coverage includeUncoveredFiles="true" ignoreDeprecatedCodeUnits="true" disableCodeCoverageIgnore="true">
-    <report>
-      <clover outputFile="clover.xml"/>
-      <text outputFile="coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
-      <xml outputDirectory="xml-coverage"/>
-    </report>
-  </coverage>
-  <logging>
-    <testdoxText outputFile="testdox.txt"/>
-  </logging>
-  <source>
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="true"
+         bootstrap="vendor/autoload.php"
+>
+  <coverage includeUncoveredFiles="true">
     <include>
-      <directory suffix=".php">src</directory>
+      <directory suffix=".php">./src</directory>
     </include>
-    <exclude>
-      <directory suffix=".php">src/generated</directory>
-      <file>src/autoload.php</file>
-    </exclude>
-  </source>
+  </coverage>
+    <testsuites>
+        <testsuite name="Test Suite">
+            <directory>./tests/</directory>
+        </testsuite>
+    </testsuites>
 </phpunit>

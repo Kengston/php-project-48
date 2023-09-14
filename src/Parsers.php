@@ -4,20 +4,17 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function ParseData($data)
+function parse(string $data, string $format): array
 {
-    $jsonData = json_decode($data, true);
+    switch ($format) {
+        case 'json':
+            return json_decode($data, true);
 
-    if ($jsonData !== null) {
-        return $jsonData;
+        case 'yml':
+        case 'yaml':
+            return Yaml::parse($data);
+
+        default:
+            throw new \Exception("Incorrect file format: $format");
     }
-
-    $yamlData = Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
-
-    if ($yamlData !== null)
-    {
-        return $yamlData;
-    }
-
-    return null;
 }
