@@ -37,12 +37,12 @@ function formatToStylish(array $diffTree, int $depth = 0): array
                 $valueNew = $node['valueNew'];
                 $formattedValueNew = toString($valueNew, $nextDepth);
                 return "{$indent}  - {$node['key']}: {$formattedValueOld}" . PHP_EOL .
-                       "{$indent}  + {$node['key']}: {$formattedValueNew}";
+                    "{$indent}  + {$node['key']}: {$formattedValueNew}";
 
             case 'nested':
                 $stringNested = implode(PHP_EOL, formatToStylish($node['children'], $nextDepth));
                 return "{$indent}    {$node['key']}: {" . PHP_EOL .
-                     "{$stringNested}" . PHP_EOL . "{$indent}    }";
+                    "{$stringNested}" . PHP_EOL . "{$indent}    }";
 
             default:
                 throw new \Exception("Incorrect node type: {$node['type']}");
@@ -51,7 +51,7 @@ function formatToStylish(array $diffTree, int $depth = 0): array
     return $result;
 }
 
-function toString($value, $depth): string
+function toString($value, int $depth): string
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
