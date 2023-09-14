@@ -1,11 +1,15 @@
 install:
 	composer install
 
+validate:
+	composer validate
+
 lint:
-	composer run-script phpcs -- --standard=PSR12 src bin tests
+	composer exec -v phpcs -- --standard=PSR12 bin src tests -np
 
 test:
-	composer run-script test
+	composer exec -v phpunit tests
 
 test-coverage:
-	XDEBUG_MODE=coverage composer run-script test -- --coverage-clover build/logs/clover.xml
+	composer exec -v phpunit tests -- --coverage-clover build/logs/clover.xml
+

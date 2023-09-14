@@ -2,62 +2,57 @@
 
 namespace Differ\Formatters\Plain;
 
-function format(array $data): string
+use function Funct\Collection\flattenAll;
+
+function format(array $diff): string
 {
-    $lines = formatToPlain($data);
-    return implode(PHP_EOL, $lines);
+    $iter = function ($diff, $ancestors) use (&$iter): array {
+        return array_map(function ($node) use ($ancestors, $iter) {
+            [
+                'key' => $key,
+                'type' => $type,
+                'oldValue' => $oldValue,
+                'newValue' => $newValue,
+                'children' => $children
+            ] = $node;
+
+            $pathToProperty = implode('.', [...$ancestors, $key]);
+
+            switch ($type) {
+                case 'complex':
+                    return $iter($children, [...$ancestors, $key]);
+                case 'added':
+                    $preparedNewValue = prepareValue($newValue);
+                    return "Property '{$pathToProperty}' was added with value: {$preparedNewValue}";
+                case 'removed':
+                    return "Property '{$pathToProperty}' was removed";
+                case 'unchanged':
+                    return [];
+                case 'updated':
+                    $preparedOldValue = prepareValue($oldValue);
+                    $preparedNewValue = prepareValue($newValue);
+                    return "Property '{$pathToProperty}' was updated. From {$preparedOldValue} to {$preparedNewValue}";
+                default:
+                    throw new \Exception("This type: {$type} is not supported.");
+            }
+        }, $diff);
+    };
+    return implode("\n", flattenAll($iter($diff, [])));
 }
 
-function formatToPlain(array $diffTree, string $path = ''): array
-{
-    $result = array_map(function ($node) use ($path): string {
-        $property = "{$path}{$node['key']}";
-        switch ($node['type']) {
-            case 'deleted':
-                return "Property '{$property}' was removed";
-
-            case 'added':
-                $formattedValue = toString($node['value']);
-                return "Property '{$property}' was added with value: {$formattedValue}";
-
-            case 'unchanged':
-                return '';
-
-            case 'changed':
-                $formattedValueOld = toString($node['valueOld']);
-                $formattedValueNew = toString($node['valueNew']);
-                return "Property '{$property}' was updated. From {$formattedValueOld} to {$formattedValueNew}";
-
-            case 'nested':
-                $ancestryPath = "{$path}{$node['key']}.";
-                return implode(PHP_EOL, formatToPlain($node['children'], $ancestryPath));
-
-            default:
-                throw new \Exception("Incorrect node type");
-        }
-    }, $diffTree);
-
-    return array_filter($result);
-}
-
-function toString($value): string
+function prepareValue($value): string
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
     }
-
     if (is_null($value)) {
         return 'null';
     }
-
-    if (is_array($value)) {
+    if (is_object($value)) {
         return '[complex value]';
     }
-
-    if (is_numeric($value)) {
-        return (string) $value; // Приводим числа к строке
+    if (is_string($value)) {
+        return "'{$value}'";
     }
-
-    return (string) $value; // Приводим другие значения к строке
+    return (string) $value;
 }
-

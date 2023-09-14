@@ -2,89 +2,74 @@
 
 namespace Differ\Formatters\Stylish;
 
-const BASE_INDENT = '    ';
+use function Funct\Collection\flattenAll;
 
-function format(array $data): string
+function format(array $diff): string
 {
-    $lines = formatToStylish($data);
-    return '{' . PHP_EOL . implode(PHP_EOL, $lines) . PHP_EOL . '}';
+    $iter = function (array $diff, int $depth) use (&$iter): array {
+        return array_map(function ($node) use ($depth, $iter) {
+            [
+                'key' => $key,
+                'type' => $type,
+                'oldValue' => $oldValue,
+                'newValue' => $newValue,
+                'children' => $children
+            ] = $node;
+
+            $indent = makeIndent($depth - 1);
+
+            switch ($type) {
+                case 'complex':
+                    $indentAfter = makeIndent($depth);
+                    return ["{$indent}    {$key}: {", $iter($children, $depth + 1), "{$indentAfter}}"];
+                case 'added':
+                    $preparedNewValue = prepareValue($newValue, $depth);
+                    return "{$indent}  + {$key}: {$preparedNewValue}";
+                case 'removed':
+                    $preparedOldValue = prepareValue($oldValue, $depth);
+                    return "{$indent}  - {$key}: {$preparedOldValue}";
+                case 'unchanged':
+                    $preparedNewValue = prepareValue($newValue, $depth);
+                    return "{$indent}    {$key}: {$preparedNewValue}";
+                case 'updated':
+                    $preparedOldValue = prepareValue($oldValue, $depth);
+                    $preparedNewValue = prepareValue($newValue, $depth);
+                    $addedLine = "{$indent}  + {$key}: {$preparedNewValue}";
+                    $deletedLine = "{$indent}  - {$key}: {$preparedOldValue}";
+                    return implode("\n", [$deletedLine, $addedLine]);
+                default:
+                    throw new \Exception("This type: {$type} is not supported.");
+            };
+        }, $diff);
+    };
+    return implode("\n", flattenAll(['{', $iter($diff, 1), '}']));
 }
 
-function formatToStylish(array $diffTree, int $depth = 0): array
-{
-    $indent = getIndent($depth);
-    $nextDepth = $depth + 1;
-    $result = array_map(function ($node) use ($indent, $nextDepth): string {
-        switch ($node['type']) {
-            case 'deleted':
-                $value = $node['value'];
-                $formattedValue = toString($value, $nextDepth);
-                return "{$indent}  - {$node['key']}: {$formattedValue}";
-
-            case 'added':
-                $value = $node['value'];
-                $formattedValue = toString($value, $nextDepth);
-                return "{$indent}  + {$node['key']}: {$formattedValue}";
-
-            case 'unchanged':
-                $value = $node['value'];
-                $formattedValue = toString($value, $nextDepth);
-                return "{$indent}    {$node['key']}: {$formattedValue}";
-
-            case 'changed':
-                $valueOld = $node['valueOld'];
-                $formattedValueOld = toString($valueOld, $nextDepth);
-                $valueNew = $node['valueNew'];
-                $formattedValueNew = toString($valueNew, $nextDepth);
-                return "{$indent}  - {$node['key']}: {$formattedValueOld}" . PHP_EOL .
-                    "{$indent}  + {$node['key']}: {$formattedValueNew}";
-
-            case 'nested':
-                $stringNested = implode(PHP_EOL, formatToStylish($node['children'], $nextDepth));
-                return "{$indent}    {$node['key']}: {" . PHP_EOL .
-                    "{$stringNested}" . PHP_EOL . "{$indent}    }";
-
-            default:
-                throw new \Exception("Incorrect node type: {$node['type']}");
-        }
-    }, $diffTree);
-    return $result;
-}
-
-function toString($value, int $depth): string
+function prepareValue($value, int $depth): string
 {
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
     }
-
     if (is_null($value)) {
         return 'null';
     }
-
-    if (is_array($value)) {
-        $result = arrayToString($value, $depth);
-        $indent = getIndent($depth);
-        $bracketsResult = "{{$result}" . PHP_EOL . "{$indent}}";
-        return $bracketsResult;
+    if (!is_object($value)) {
+        return $value;
     }
 
-    return (string) $value; // Приводим другие значения к строке
-}
+    $keys = array_keys(get_object_vars($value));
+    $indent = makeIndent($depth);
 
-function arrayToString(array $arrayValue, int $depth): string
-{
-    $keys = array_keys($arrayValue);
-    $inDepth = $depth + 1;
-    $result = array_map(function ($key) use ($arrayValue, $inDepth): string {
-        $val = toString($arrayValue[$key], $inDepth);
-        $indent = getIndent($inDepth);
-        $result = PHP_EOL . "{$indent}{$key}: {$val}";
-        return $result;
+    $lines = array_map(function ($key) use ($value, $depth, $indent): string {
+        $childrenValue = prepareValue($value->$key, $depth + 1);
+            return "{$indent}    {$key}: {$childrenValue}";
     }, $keys);
-    return implode('', $result);
+
+    $preparedValue = implode("\n", $lines);
+    return "{\n{$preparedValue}\n{$indent}}";
 }
 
-function getIndent(int $multiplier): string
+function makeIndent(int $depth): string
 {
-    return str_repeat(BASE_INDENT, $multiplier);
+    return str_repeat(" ", 4 * $depth);
 }
