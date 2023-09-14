@@ -68,7 +68,7 @@ function toString($value, int $depth): string
         return $bracketsResult;
     }
 
-    return "{$value}";
+    return (string) $value; // Приводим другие значения к строке
 }
 
 function arrayToString(array $arrayValue, int $depth): string

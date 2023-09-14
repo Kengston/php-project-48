@@ -55,8 +55,9 @@ function toString($value): string
     }
 
     if (is_numeric($value)) {
-        return "{$value}";
+        return (string) $value; // Приводим числа к строке
     }
 
-    return "'{$value}'";
+    return (string) $value; // Приводим другие значения к строке
 }
+
