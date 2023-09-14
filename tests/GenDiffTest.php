@@ -1,6 +1,6 @@
 <?php
 
-namespace Differ\Tests;
+namespace Differ\tests\GenDiffTest;
 
 use PHPUnit\Framework\TestCase;
 
@@ -8,61 +8,47 @@ use function Differ\Differ\genDiff;
 
 class GenDiffTest extends TestCase
 {
-    private function getFilePathFixtures(string $fileName): string
+    public function testGenDiff()
     {
-        $parts = [__DIR__, 'fixtures', $fileName];
-        return implode(DIRECTORY_SEPARATOR, $parts);
+        $fixture1 = $this->getPathToFixture('file3.json');
+        $fixture2 = $this->getPathToFixture('file4.json');
+        $actual = genDiff($fixture1, $fixture2, 'stylish');
+        $expected = file_get_contents($this->getPathToFixture('expectedStylish'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.yaml');
+        $fixture2 = $this->getPathToFixture('file4.yaml');
+        $actual = genDiff($fixture1, $fixture2, 'stylish');
+        $expected = file_get_contents($this->getPathToFixture('expectedStylish'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.json');
+        $fixture2 = $this->getPathToFixture('file4.json');
+        $actual = genDiff($fixture1, $fixture2, 'plain');
+        $expected = file_get_contents($this->getPathToFixture('expectedPlain'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.yaml');
+        $fixture2 = $this->getPathToFixture('file4.yaml');
+        $actual = genDiff($fixture1, $fixture2, 'plain');
+        $expected = file_get_contents($this->getPathToFixture('expectedPlain'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.json');
+        $fixture2 = $this->getPathToFixture('file4.json');
+        $actual = genDiff($fixture1, $fixture2, 'json');
+        $expected = file_get_contents($this->getPathToFixture('expectedJson'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.yaml');
+        $fixture2 = $this->getPathToFixture('file4.yaml');
+        $actual = genDiff($fixture1, $fixture2, 'json');
+        $expected = file_get_contents($this->getPathToFixture('expectedJson'));
+        $this->assertEquals($expected, $actual);
     }
 
-     /**
-     * @dataProvider defaultOutputProvider
-     */
-    public function testDefaultFormatOutput(string $fileName1, string $fileName2, string $expectedFileName): void
+    private function getPathToFixture($fixtureName)
     {
-        $outputFilePath = $this->getFilePathFixtures($expectedFileName);
-        $expectedOutput = file_get_contents($outputFilePath);
-
-        $inputFilePath1 = $this->getFilePathFixtures($fileName1);
-        $inputFilePath2 = $this->getFilePathFixtures($fileName2);
-
-        $diffResult = genDiff($inputFilePath1, $inputFilePath2);
-
-        $this->assertSame($expectedOutput, $diffResult);
-    }
-
-    /**
-     * @dataProvider differentFormatsProvider
-     */
-    public function testDifferentFormatOutputs(
-        string $fileName1,
-        string $fileName2,
-        string $format,
-        string $expectedFileName
-    ): void {
-        $outputFilePath = $this->getFilePathFixtures($expectedFileName);
-        $expectedOutput = trim(file_get_contents($outputFilePath));
-
-        $inputFilePath1 = $this->getFilePathFixtures($fileName1);
-        $inputFilePath2 = $this->getFilePathFixtures($fileName2);
-
-        $diffResult = genDiff($inputFilePath1, $inputFilePath2, $format);
-
-        $this->assertSame($expectedOutput, $diffResult);
-    }
-
-    public function defaultOutputProvider(): array
-    {
-        return [
-            'default output for yaml files' => ['fileNest1.yml', 'fileNest2.yml', 'diffStylish.txt']
-        ];
-    }
-
-    public function differentFormatsProvider(): array
-    {
-        return [
-            'output stylish' => ['fileNest1.yml', 'fileNest2.yml', 'stylish', 'diffStylish.txt'],
-            'output plain' => ['fileNest1.json', 'fileNest2.json', 'plain', 'diffPlain.txt'],
-            'output json' => ['fileNest1.json', 'fileNest2.json', 'json', 'diffJson.txt']
-        ];
+        return __DIR__ . "/fixtures/" . $fixtureName;
     }
 }

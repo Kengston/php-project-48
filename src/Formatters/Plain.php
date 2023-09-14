@@ -2,57 +2,57 @@
 
 namespace Differ\Formatters\Plain;
 
-use function Funct\Collection\flattenAll;
+use function Functional\flatten;
 
-function format(array $diff): string
+function plainFormat(array $diff): string
 {
-    $iter = function ($diff, $ancestors) use (&$iter): array {
-        return array_map(function ($node) use ($ancestors, $iter) {
-            [
-                'key' => $key,
-                'type' => $type,
-                'oldValue' => $oldValue,
-                'newValue' => $newValue,
-                'children' => $children
-            ] = $node;
+    $formattedDiff = makeStringsFromDiff($diff);
+    $result = implode("\n", $formattedDiff);
 
-            $pathToProperty = implode('.', [...$ancestors, $key]);
-
-            switch ($type) {
-                case 'complex':
-                    return $iter($children, [...$ancestors, $key]);
-                case 'added':
-                    $preparedNewValue = prepareValue($newValue);
-                    return "Property '{$pathToProperty}' was added with value: {$preparedNewValue}";
-                case 'removed':
-                    return "Property '{$pathToProperty}' was removed";
-                case 'unchanged':
-                    return [];
-                case 'updated':
-                    $preparedOldValue = prepareValue($oldValue);
-                    $preparedNewValue = prepareValue($newValue);
-                    return "Property '{$pathToProperty}' was updated. From {$preparedOldValue} to {$preparedNewValue}";
-                default:
-                    throw new \Exception("This type: {$type} is not supported.");
-            }
-        }, $diff);
-    };
-    return implode("\n", flattenAll($iter($diff, [])));
+    return "{$result}";
 }
 
-function prepareValue($value): string
+function makeStringsFromDiff(array $diff, string $path = ''): array
 {
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
+    $callback = function ($node) use ($path) {
+        list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
+        $fullPath = "{$path}{$key}";
+
+        switch ($status) {
+            case 'nested':
+                return makeStringsFromDiff($value1, "{$path}{$key}.");
+            case 'added':
+                $stringifiedValue1 = stringifyValue($value1);
+                return "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
+            case 'removed':
+                return "Property '{$fullPath}' was removed";
+            case 'updated':
+                $stringifiedValue1 = stringifyValue($value1);
+                $stringifiedValue2 = stringifyValue($value2);
+                return "Property '{$fullPath}' was updated. From {$stringifiedValue1} to {$stringifiedValue2}";
+            case 'same':
+                return;
+        }
+    };
+    $arrayOfDifferences = flatten(array_map($callback, $diff));
+    return array_filter($arrayOfDifferences, function ($valueOfDifference) {
+        return !is_null($valueOfDifference);
+    });
+}
+
+function stringifyValue(mixed $value): mixed
+{
     if (is_null($value)) {
         return 'null';
     }
-    if (is_object($value)) {
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+    if (is_array($value)) {
         return '[complex value]';
     }
-    if (is_string($value)) {
-        return "'{$value}'";
+    if (is_numeric($value)) {
+        return $value;
     }
-    return (string) $value;
+    return "'{$value}'";
 }

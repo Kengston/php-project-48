@@ -2,20 +2,16 @@
 
 namespace Differ\Formatters;
 
-use function Differ\Formatters\Json\format as formatJson;
-use function Differ\Formatters\Stylish\format as formatStylish;
-use function Differ\Formatters\Plain\format as formatPlain;
+use function Differ\Formatters\Stylish\stylishFormat;
+use function Differ\Formatters\Plain\plainFormat;
+use function Differ\Formatters\Json\jsonFormat;
 
-function format(array $ast, string $format): string
+function makeFormat(array $diff, string $formatName): string
 {
-    switch ($format) {
-        case 'json':
-            return formatJson($ast);
-        case 'stylish':
-            return formatStylish($ast);
-        case 'plain':
-            return formatPlain($ast);
-        default:
-            throw new \Exception("The report format '{$format}' is not supported");
-    }
+    return match ($formatName) {
+        'stylish' => stylishFormat($diff),
+        'plain' => plainFormat($diff),
+        'json' => jsonFormat($diff),
+        default => exit("Unknown format '{$formatName}'!\n")
+    };
 }

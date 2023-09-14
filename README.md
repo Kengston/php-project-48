@@ -1,69 +1,35 @@
 ### Hexlet tests and linter status:
-[![Actions Status](https://github.com/yulia633/php-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/yulia633/php-project-lvl2/actions)
+[![Actions Status](https://github.com/NickRyabinin/php-project-48/workflows/hexlet-check/badge.svg)](https://github.com/NickRyabinin/php-project-48/actions)
+[![Actions Status](https://github.com/NickRyabinin/php-project-48/workflows/actions/badge.svg)](https://github.com/NickRyabinin/php-project-48/actions)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c6753aeb2e9878b66cd6/maintainability)](https://codeclimate.com/github/NickRyabinin/php-project-48/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c6753aeb2e9878b66cd6/test_coverage)](https://codeclimate.com/github/NickRyabinin/php-project-48/test_coverage)
+### Вычислитель отличий – программа, определяющая разницу между двумя структурами данных. Возможности утилиты:
 
-## CLI Differences Files Hexlet
-[![Maintainability](https://api.codeclimate.com/v1/badges/8d73837fc211fc2552d0/maintainability)](https://codeclimate.com/github/yulia633/php-project-lvl2/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/8d73837fc211fc2552d0/test_coverage)](https://codeclimate.com/github/yulia633/php-project-lvl2/test_coverage)
-![linter and tests](https://github.com/yulia633/php-project-lvl2/workflows/linter%20and%20tests/badge.svg)
+* Поддержка разных входных форматов: yaml и json
+* Генерация отчета в виде plain text, stylish и json
 
-Второй проект из четырёх, в рамках профессии PHP-программист на [Хекслет](https://ru.hexlet.io/professions/php).
+### Требования:
+php >= 8
 
-#### Описание проекта
-В рамках данного проекта необходимо реализовать утилиту для поиска отличий в конфигурационных файлах.
+composer
 
-Возможности утилиты:
+### Установка:
+```bash
+git clone git@github.com:NickRyabinin/php-project-48.git
 
+make install
 ```
-Поддержка разных форматов: json, yaml
-Генерация отчетов json, plain, stylish
-```
+### Установка и тестирование:
+[![asciicast](https://asciinema.org/a/FPx75wNoViucyHrOw8npouUgm.svg)](https://asciinema.org/a/FPx75wNoViucyHrOw8npouUgm)
 
-Пример использования:
------
-#### CLI приложение:  
-    $ gendiff [--format <fmt>] <pathToFile1> <pathTofile2>
-    
-Посмотреть описание в командной строке:
+### Краткая помощь по использованию (gendiff -h). Пример входных файлов:
+[![asciicast](https://asciinema.org/a/foDhD4jeEkQL3A5CZPZN8kc0I.svg)](https://asciinema.org/a/foDhD4jeEkQL3A5CZPZN8kc0I)
 
-    $ gendiff -h
-    $ gendiff --help
+### Формат вывода отчёта stylish (по умолчанию):
+[![asciicast](https://asciinema.org/a/KWvWESuHYdUidPyaK0L9WaHKQ.svg)](https://asciinema.org/a/KWvWESuHYdUidPyaK0L9WaHKQ)
 
-#### Библиотека:
-    use function Differ\Differ\genDiff;
-    
-    genDiff($pathToFile1, $pathTofile2, $format = 'stylish');
+### Формат вывода отчёта plain:
+[![asciicast](https://asciinema.org/a/pfitB2aBwCtcbxbkMwTfn6uBH.svg)](https://asciinema.org/a/pfitB2aBwCtcbxbkMwTfn6uBH)
 
-#### Установка
-Для глобальной установки выполните команду:
-`$ composer global require yulia633/hexlet-project-2`
-
-Для установки в проект как библиотеку выполните команду:
-`$ composer require yulia633/hexlet-project-2`
-
-#### Для разработки
-* PHP >=7.4
-* Composer
-
-#### Команды
-```shell
-$ make install
-$ make lint
-$ make test
-```
-
-### Как работает пакет
-
-#### Сравнение файлов json и yaml/yml в формате по умолчанию stylish
-[![asciicast](https://asciinema.org/a/394025.svg)](https://asciinema.org/a/394025)
-
-#### Сравнение файлов json и yaml/yml в формате stylish
-[![asciicast](https://asciinema.org/a/392111.svg)](https://asciinema.org/a/392111)
-
-#### Сравнение файлов json/yaml в формате plain 
-[![asciicast](https://asciinema.org/a/392103.svg)](https://asciinema.org/a/392103)
-
-#### Сравнение файлов json/yaml в формате json
-[![asciicast](https://asciinema.org/a/392109.svg)](https://asciinema.org/a/392109)
-
-#### Пример работы с запуском из локального окружения
-[![asciicast](https://asciinema.org/a/394132.svg)](https://asciinema.org/a/394132)
+### Формат вывода отчёта json:
+[![asciicast](https://asciinema.org/a/eUDJZW7KdtHuWemYFVHLzNstc.svg)](https://asciinema.org/a/eUDJZW7KdtHuWemYFVHLzNstc)

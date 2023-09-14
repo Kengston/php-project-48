@@ -2,74 +2,78 @@
 
 namespace Differ\Formatters\Stylish;
 
-use function Funct\Collection\flattenAll;
-
-function format(array $diff): string
+function stylishFormat(array $diff): string
 {
-    $iter = function (array $diff, int $depth) use (&$iter): array {
-        return array_map(function ($node) use ($depth, $iter) {
-            [
-                'key' => $key,
-                'type' => $type,
-                'oldValue' => $oldValue,
-                'newValue' => $newValue,
-                'children' => $children
-            ] = $node;
+    $formattedDiff = makeStringsFromDiff($diff);
+    $result = implode("\n", $formattedDiff);
 
-            $indent = makeIndent($depth - 1);
-
-            switch ($type) {
-                case 'complex':
-                    $indentAfter = makeIndent($depth);
-                    return ["{$indent}    {$key}: {", $iter($children, $depth + 1), "{$indentAfter}}"];
-                case 'added':
-                    $preparedNewValue = prepareValue($newValue, $depth);
-                    return "{$indent}  + {$key}: {$preparedNewValue}";
-                case 'removed':
-                    $preparedOldValue = prepareValue($oldValue, $depth);
-                    return "{$indent}  - {$key}: {$preparedOldValue}";
-                case 'unchanged':
-                    $preparedNewValue = prepareValue($newValue, $depth);
-                    return "{$indent}    {$key}: {$preparedNewValue}";
-                case 'updated':
-                    $preparedOldValue = prepareValue($oldValue, $depth);
-                    $preparedNewValue = prepareValue($newValue, $depth);
-                    $addedLine = "{$indent}  + {$key}: {$preparedNewValue}";
-                    $deletedLine = "{$indent}  - {$key}: {$preparedOldValue}";
-                    return implode("\n", [$deletedLine, $addedLine]);
-                default:
-                    throw new \Exception("This type: {$type} is not supported.");
-            };
-        }, $diff);
-    };
-    return implode("\n", flattenAll(['{', $iter($diff, 1), '}']));
+    return "{\n{$result}\n}";
 }
 
-function prepareValue($value, int $depth): string
+function makeStringsFromDiff(array $diff, int $level = 0): array
 {
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
+    $spaces = getSpaces($level);
+    $nextLevel = $level + 1;
+
+    $callback = function ($node) use ($spaces, $nextLevel) {
+        list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
+
+        switch ($status) {
+            case 'nested':
+                $nested = makeStringsFromDiff($value1, $nextLevel);
+                $stringifiedNest = implode("\n", $nested);
+                return "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
+            case 'same':
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                return "{$spaces}    {$key}: {$stringifiedValue1}";
+            case 'added':
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                return "{$spaces}  + {$key}: {$stringifiedValue1}";
+            case 'removed':
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                return "{$spaces}  - {$key}: {$stringifiedValue1}";
+            case 'updated':
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                $stringifiedValue2 = stringifyValue($value2, $nextLevel);
+                return "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
+        }
+    };
+    return array_map($callback, $diff);
+}
+
+function getSpaces(int $level): string
+{
+    return str_repeat('    ', $level);
+}
+
+function stringifyValue(mixed $value, int $level): mixed
+{
     if (is_null($value)) {
         return 'null';
     }
-    if (!is_object($value)) {
-        return $value;
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
     }
-
-    $keys = array_keys(get_object_vars($value));
-    $indent = makeIndent($depth);
-
-    $lines = array_map(function ($key) use ($value, $depth, $indent): string {
-        $childrenValue = prepareValue($value->$key, $depth + 1);
-            return "{$indent}    {$key}: {$childrenValue}";
-    }, $keys);
-
-    $preparedValue = implode("\n", $lines);
-    return "{\n{$preparedValue}\n{$indent}}";
+    if (is_array($value)) {
+        $result = convertArrayToString($value, $level);
+        $spaces = getSpaces($level);
+        return "{{$result}\n{$spaces}}";
+    }
+    return "{$value}";
 }
 
-function makeIndent(int $depth): string
+function convertArrayToString(array $value, int $level): string
 {
-    return str_repeat(" ", 4 * $depth);
+    $keys = array_keys($value);
+    $result = [];
+    $nextLevel = $level + 1;
+
+    $callback = function ($key) use ($value, $nextLevel) {
+        $newValue = stringifyValue($value[$key], $nextLevel);
+        $spaces = getSpaces($nextLevel);
+
+        return "\n{$spaces}{$key}: {$newValue}";
+    };
+
+    return implode('', array_map($callback, $keys));
 }

@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Json;
 
-function format(array $data): string
+function jsonFormat(array $diff)
 {
-    return json_encode($data, JSON_THROW_ON_ERROR);
+    return json_encode($diff, JSON_PRETTY_PRINT);
 }

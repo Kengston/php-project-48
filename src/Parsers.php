@@ -4,15 +4,30 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parse(string $data, string $type): object
+function getFileContent(string $pathToFile)
 {
-    switch ($type) {
-        case 'json':
-            return json_decode($data, false, 512, JSON_THROW_ON_ERROR);
-        case 'yaml':
-        case 'yml':
-            return Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
-        default:
-            throw new \Exception("The type: '{$type}' is not supported");
+    $contentOfFile = @file_get_contents($pathToFile);
+    if ($contentOfFile !== false) {
+        return $contentOfFile;
     }
+    throw new \Exception("File not found", 1);
+}
+
+function parse(string $pathToFile)
+{
+    $contentOfFile = getFileContent($pathToFile);
+    $extensionOfFile = pathinfo($pathToFile, PATHINFO_EXTENSION);
+    switch ($extensionOfFile) {
+        case 'json':
+            $parsedContentOfFile = json_decode($contentOfFile, true);
+            break;
+        case 'yml':
+        case 'yaml':
+            $parsedContentOfFile = Yaml::parse($contentOfFile);
+            break;
+        default:
+            throw new \Exception("Unsupported format of incoming file!", 1);
+    }
+
+    return $parsedContentOfFile;
 }
